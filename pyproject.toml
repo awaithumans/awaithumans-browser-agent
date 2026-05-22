@@ -1,0 +1,35 @@
+[project]
+name = "awaithumans-browser-agent"
+version = "0.1.0"
+description = "Browser agent that asks before it buys — awaithumans + browser-use template"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "awaithumans", email = "hello@awaithumans.dev" }
+]
+keywords = ["ai", "agent", "hitl", "human-in-the-loop", "browser-automation", "awaithumans", "browser-use"]
+dependencies = [
+    "browser-use>=0.1.0",
+    "awaithumans>=0.1.1",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+]
+
+[project.optional-dependencies]
+openai = ["langchain-openai>=0.2.0"]
+anthropic = ["langchain-anthropic>=0.3.0"]
+verifier = ["awaithumans[verifier-claude]"]
+
+[project.urls]
+Homepage = "https://github.com/awaithumans/awaithumans-browser-agent"
+Documentation = "https://docs.awaithumans.dev"
+"Bug Tracker" = "https://github.com/awaithumans/awaithumans-browser-agent/issues"
+"Parent project" = "https://github.com/awaithumans/awaithumans"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/awaithumans_browser_agent"]
