@@ -10,7 +10,7 @@ authors = [
 ]
 keywords = ["ai", "agent", "hitl", "human-in-the-loop", "browser-automation", "awaithumans", "browser-use"]
 dependencies = [
-    "browser-use>=0.1.0",
+    "browser-use>=0.12.7",
     "awaithumans>=0.1.1",
     "python-dotenv>=1.0.0",
     "pydantic>=2.0.0",

@@ -16,7 +16,7 @@ import asyncio
 import os
 
 from browser_use import ActionResult, Agent, Tools
-from browser_use.llm import ChatOpenAI
+from browser_use import ChatOpenAI
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 

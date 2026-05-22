@@ -23,7 +23,7 @@ import asyncio
 import os
 
 from browser_use import ActionResult, Agent, Tools
-from browser_use.llm import ChatOpenAI
+from browser_use import ChatOpenAI
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
@@ -154,20 +154,32 @@ async def request_human_approval(
 
 
 async def main() -> None:
-    store_url = os.environ.get("DEMO_STORE_URL", "http://localhost:8080")
+    # We use saucedemo.com — the testing community's canonical practice site.
+    # Login is publicly documented (standard_user / secret_sauce); no real
+    # money moves; no CAPTCHAs. Override via env if you want to point at a
+    # different store.
+    store_url = os.environ.get("SAUCEDEMO_URL", "https://www.saucedemo.com")
+    username = os.environ.get("SAUCEDEMO_USERNAME", "standard_user")
+    password = os.environ.get("SAUCEDEMO_PASSWORD", "secret_sauce")
 
     task = (
-        f"Go to {store_url}. Find a USB-C hub priced under $40 with at least "
-        "4-star reviews. Add it to the cart. Proceed to checkout. Fill the "
-        "shipping form using these details:\n"
-        "  - Name: Demo User\n"
-        "  - Address: 123 Test Lane, Test City, CA 94000, USA\n"
-        "  - Email: demo@example.com\n"
-        "Reach the order-review page. BEFORE clicking 'Place order' you MUST "
-        "call request_human_approval with the cart total, item name, quantity, "
-        "shipping address, and current URL. If the human approves, click "
-        "'Place order' and confirm the order ID. If rejected, do NOT submit; "
-        "report what happened."
+        f"Go to {store_url}. Log in with username '{username}' and password "
+        f"'{password}'. Once logged in you'll see the products page.\n"
+        "\n"
+        "Find the 'Sauce Labs Backpack' (it should be priced at $29.99). "
+        "Click 'Add to cart'. Click the cart icon (top right). Click "
+        "'Checkout'. Fill in the checkout form:\n"
+        "  - First Name: Demo\n"
+        "  - Last Name: User\n"
+        "  - Zip: 94000\n"
+        "Click 'Continue'. You'll reach the 'Checkout: Overview' page showing "
+        "the cart total.\n"
+        "\n"
+        "STOP HERE. BEFORE clicking the final 'Finish' button you MUST call "
+        "request_human_approval with the cart total, item name, quantity (1), "
+        "shipping address ('Demo User, 94000'), and the current URL. If the "
+        "human approves, click 'Finish' and report the confirmation page text. "
+        "If rejected, do NOT click Finish; report what happened."
     )
 
     agent = Agent(

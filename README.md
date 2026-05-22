@@ -30,7 +30,7 @@ The agent pauses on the order-review screen, sends one of these to you, and wait
 
 ---
 
-## ⚡ Quick start (3 minutes)
+## ⚡ Quick start (~5 minutes)
 
 ```bash
 # 1. Clone
@@ -42,18 +42,24 @@ cp .env.example .env
 # Edit .env: pick "slack" or "email" for AWAITHUMANS_DEMO_CHANNEL,
 # fill in the matching credentials + your OpenAI API key.
 
-# 3. Start the awaithumans server + demo store
+# 3. Start the awaithumans server locally
 docker compose up -d
+# Verify: curl http://localhost:3001/health  → {"status":"ok"}
 
-# 4. Install deps (uv recommended; pip works fine)
+# 4. Install Python deps (uv recommended; pip works fine)
 uv pip install -e .
 # or: pip install -e .
 
-# 5. Run the demo
+# 5. Install Playwright browsers (required by browser-use)
+playwright install chromium
+
+# 6. Run the demo
 python buy_usb_hub.py
 ```
 
-Then watch your Slack or inbox — the agent will reach checkout and ping you for approval within ~30 seconds.
+The agent logs into [saucedemo.com](https://www.saucedemo.com), adds a backpack to the cart, walks through checkout — and right before clicking **Finish**, it pings your Slack or email and waits. Approve in your channel, the agent submits. Reject, it stops.
+
+Whole loop takes ~60-90 seconds from `python buy_usb_hub.py` to "agent paused, your turn."
 
 ### Don't have Slack? Use email
 
@@ -112,14 +118,16 @@ The agent reads the decision via `ActionResult.extracted_content` and either sub
 
 ```
 .
-├── buy_usb_hub.py          ← Main demo (~90 lines)
+├── buy_usb_hub.py          ← Main demo — buys a Sauce Labs Backpack on saucedemo.com
 ├── job_application.py      ← Secondary demo: agent drafts an application, you approve the submit
-├── docker-compose.yml      ← awaithumans server + WooCommerce demo store
+├── docker-compose.yml      ← awaithumans server (the demo store is saucedemo.com — public, no Docker needed)
 ├── .env.example            ← Both channel configs side-by-side
 ├── pyproject.toml          ← Python deps
 └── docs/
     └── images/             ← Screenshots
 ```
+
+> **Filename note:** `buy_usb_hub.py` is named after the *conceptual* demo (an agent buying something tangible). The actual test target is saucedemo's `Sauce Labs Backpack` because that's the safe, public, login-included testing site. Point it at any store by editing the `task=` string + the `SAUCEDEMO_*` env vars.
 
 ### Why two examples?
 
@@ -170,7 +178,9 @@ Same shape works for any risky action: deploy, delete, send, post, suspend, refu
 
 ## 🧪 The demo store
 
-Both demos point at a self-hosted [WooCommerce demo store](https://woocommerce.com/storefront/) (port 8080 via `docker-compose`). **No real money moves. No CAPTCHA. Repeatable.** Swap to any real store by changing `DEMO_STORE_URL` in `.env`.
+The checkout demo points at **[saucedemo.com](https://www.saucedemo.com)** — the testing community's canonical practice site. **Public, free, login is intentionally publishable (`standard_user` / `secret_sauce`), no real money moves, no CAPTCHA, no rate limits.** This is the same site the Selenium/Playwright community uses for everyday automation demos.
+
+Swap to any other store by changing `SAUCEDEMO_URL` + credentials in `.env`.
 
 ---
 

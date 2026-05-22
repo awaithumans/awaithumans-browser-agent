@@ -1,6 +1,6 @@
-# Runs everything the demo needs locally:
-#   - awaithumans server (API + dashboard at http://localhost:3001)
-#   - WooCommerce demo store (at http://localhost:8080)
+# Runs the awaithumans server locally (API + dashboard at http://localhost:3001).
+#
+# The demo store is saucedemo.com — public, no Docker needed.
 #
 # Spin up:
 #   docker compose up -d
@@ -14,29 +14,16 @@ services:
     ports:
       - "3001:3001"
     environment:
-      AWAITHUMANS_DATABASE_URL: sqlite:///./awaithumans.db
+      AWAITHUMANS_DATABASE_URL: sqlite:////app/data/awaithumans.db
       AWAITHUMANS_API_KEY: dev-key-not-secret
       AWAITHUMANS_PAYLOAD_KEY: ${AWAITHUMANS_PAYLOAD_KEY:-please-set-a-random-32-char-string-here}
-      # Channel credentials — picked up from your .env via env_file below
+      # Channel credentials are picked up from your .env via env_file below.
     env_file:
       - .env
     volumes:
       - awaithumans-data:/app/data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-
-  demo-store:
-    image: woocommerce/woocommerce-demo:latest
-    container_name: awaithumans-demo-store
-    ports:
-      - "8080:80"
-    # Lightweight read-only demo store. The agent's "purchases" never leave
-    # localhost — no real money moves.
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/"]
       interval: 10s
       timeout: 3s
       retries: 5
