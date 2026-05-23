@@ -22,8 +22,7 @@ from __future__ import annotations
 import asyncio
 import os
 
-from browser_use import ActionResult, Agent, Tools
-from browser_use import ChatOpenAI
+from browser_use import ActionResult, Agent, ChatAnthropic, ChatOpenAI, Tools
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
@@ -182,9 +181,20 @@ async def main() -> None:
         "If rejected, do NOT click Finish; report what happened."
     )
 
+    # Pick whichever LLM key you set. Auto-falls-back to Anthropic if
+    # OPENAI_API_KEY isn't present.
+    if os.environ.get("OPENAI_API_KEY"):
+        llm = ChatOpenAI(model="gpt-4o-mini")
+    elif os.environ.get("ANTHROPIC_API_KEY"):
+        llm = ChatAnthropic(model="claude-haiku-4-5")
+    else:
+        raise SystemExit(
+            "Set OPENAI_API_KEY or ANTHROPIC_API_KEY in .env before running."
+        )
+
     agent = Agent(
         task=task,
-        llm=ChatOpenAI(model="gpt-4o-mini"),
+        llm=llm,
         tools=tools,
     )
 
