@@ -24,6 +24,11 @@ services:
       # which is the directory it owns + has write perms on. Overriding to
       # /app/data was forcing alembic to write to a root-owned directory the
       # awaithumans user can't write to.
+      # Verbose logging — surfaces auth / signup / login errors in the container
+      # logs so we can debug from outside. The image's default suppresses
+      # uvicorn access logs which makes browser-driven flows opaque.
+      AWAITHUMANS_LOG_LEVEL: DEBUG
+      UVICORN_LOG_LEVEL: info
       # Channel credentials are picked up from your .env via env_file below.
     env_file:
       - .env
