@@ -14,19 +14,26 @@ services:
     ports:
       - "3001:3001"
     environment:
-      AWAITHUMANS_DATABASE_URL: sqlite:////app/data/awaithumans.db
       AWAITHUMANS_API_KEY: dev-key-not-secret
       # No default — if not set in .env the compose CLI will fail loudly with
       # "variable is not set" instead of starting the server with a placeholder
       # and crashing at lifespan (exit code 3 with no traceback).
-      AWAITHUMANS_PAYLOAD_KEY: ${AWAITHUMANS_PAYLOAD_KEY:?Generate one with: openssl rand -hex 16, then set it in .env}
+      AWAITHUMANS_PAYLOAD_KEY: "${AWAITHUMANS_PAYLOAD_KEY:?Set AWAITHUMANS_PAYLOAD_KEY in .env — generate with openssl rand -hex 16}"
+      # We do NOT override AWAITHUMANS_DATABASE_URL or AWAITHUMANS_DB_PATH —
+      # the image already sets them to /var/lib/awaithumans/awaithumans.db,
+      # which is the directory it owns + has write perms on. Overriding to
+      # /app/data was forcing alembic to write to a root-owned directory the
+      # awaithumans user can't write to.
       # Channel credentials are picked up from your .env via env_file below.
     env_file:
       - .env
     volumes:
-      - awaithumans-data:/app/data
+      # Mount at /var/lib/awaithumans (the image's actual data dir, NOT /app/data).
+      - awaithumans-data:/var/lib/awaithumans
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      # The server exposes /api/health (no auth required). /health itself is
+      # served by the bundled dashboard's catch-all 404 page.
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
       interval: 10s
       timeout: 3s
       retries: 5
