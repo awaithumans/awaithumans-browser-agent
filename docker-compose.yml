@@ -16,7 +16,10 @@ services:
     environment:
       AWAITHUMANS_DATABASE_URL: sqlite:////app/data/awaithumans.db
       AWAITHUMANS_API_KEY: dev-key-not-secret
-      AWAITHUMANS_PAYLOAD_KEY: ${AWAITHUMANS_PAYLOAD_KEY:-please-set-a-random-32-char-string-here}
+      # No default — if not set in .env the compose CLI will fail loudly with
+      # "variable is not set" instead of starting the server with a placeholder
+      # and crashing at lifespan (exit code 3 with no traceback).
+      AWAITHUMANS_PAYLOAD_KEY: ${AWAITHUMANS_PAYLOAD_KEY:?Generate one with: openssl rand -hex 16, then set it in .env}
       # Channel credentials are picked up from your .env via env_file below.
     env_file:
       - .env
