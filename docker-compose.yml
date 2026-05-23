@@ -35,13 +35,10 @@ services:
     volumes:
       # Mount at /var/lib/awaithumans (the image's actual data dir, NOT /app/data).
       - awaithumans-data:/var/lib/awaithumans
-    healthcheck:
-      # The server exposes /api/health (no auth required). /health itself is
-      # served by the bundled dashboard's catch-all 404 page.
-      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
+    # No healthcheck override — the awaithumans image already ships one
+    # (Python urllib hitting /api/health), and our previous curl-based
+    # override silently failed because the slim Python image doesn't
+    # have curl installed. Let the image's default run instead.
 
 volumes:
   awaithumans-data:
