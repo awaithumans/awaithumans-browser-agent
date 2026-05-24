@@ -35,6 +35,15 @@ services:
     volumes:
       # Mount at /var/lib/awaithumans (the image's actual data dir, NOT /app/data).
       - awaithumans-data:/var/lib/awaithumans
+      # Expose the server's auto-generated discovery file (admin token + URL)
+      # to the host. The SDK auto-reads ~/.awaithumans-dev.json so the agent
+      # can authenticate to the server without you copy-pasting the admin
+      # token into .env. Without this, every container restart rotates the
+      # token and breaks the demo until the host file is refreshed.
+      #
+      # The file is rewritten on every server boot, so the host copy stays
+      # in sync.
+      - ${HOME}/.awaithumans-dev.json:/var/lib/awaithumans/.awaithumans-dev.json:rw
     # No healthcheck override — the awaithumans image already ships one
     # (Python urllib hitting /api/health), and our previous curl-based
     # override silently failed because the slim Python image doesn't
