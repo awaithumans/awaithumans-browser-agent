@@ -187,10 +187,19 @@ async def main() -> None:
 
     # Pick whichever LLM key you set. Auto-falls-back to Anthropic if
     # OPENAI_API_KEY isn't present.
+    #
+    # Model picks are deliberate: the agent has to fluently call our
+    # CUSTOM `request_human_approval` tool, which has 5+ typed
+    # parameters. Smaller models (gpt-4o-mini, claude-haiku) intermittently
+    # stuff the action JSON into the `thinking` field instead of the
+    # `action` field that browser-use's validator requires — wasting
+    # tokens and hitting the consecutive-failure limit. Sonnet is the
+    # sweet spot of cost vs. structured-output reliability for this
+    # task; bump to Opus only if you see Sonnet struggling.
     if os.environ.get("OPENAI_API_KEY"):
-        llm = ChatOpenAI(model="gpt-4o-mini")
+        llm = ChatOpenAI(model="gpt-4o")
     elif os.environ.get("ANTHROPIC_API_KEY"):
-        llm = ChatAnthropic(model="claude-haiku-4-5")
+        llm = ChatAnthropic(model="claude-sonnet-4-5")
     else:
         raise SystemExit(
             "Set OPENAI_API_KEY or ANTHROPIC_API_KEY in .env before running."

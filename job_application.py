@@ -116,10 +116,13 @@ async def main() -> None:
         "approves, submit. If rejected, revise and ask again."
     )
 
+    # See note in buy_usb_hub.py — Sonnet/gpt-4o handle our custom
+    # tool's typed parameters reliably; smaller models intermittently
+    # malform the structured output.
     if os.environ.get("OPENAI_API_KEY"):
-        llm = ChatOpenAI(model="gpt-4o-mini")
+        llm = ChatOpenAI(model="gpt-4o")
     elif os.environ.get("ANTHROPIC_API_KEY"):
-        llm = ChatAnthropic(model="claude-haiku-4-5")
+        llm = ChatAnthropic(model="claude-sonnet-4-5")
     else:
         raise SystemExit(
             "Set OPENAI_API_KEY or ANTHROPIC_API_KEY in .env before running."
