@@ -126,11 +126,19 @@ async def request_human_approval(
         else os.environ["DEMO_EMAIL_NOTIFY"]
     )
 
+    # assign_to is OWNERSHIP (only this user can submit without claiming),
+    # while notify is just a heads-up. Setting both means the dashboard
+    # opens straight into the response form — no 'Claim it' step. Default
+    # to the operator email you signed up with; override if multiple
+    # humans share the queue.
+    operator_email = os.environ.get("DEMO_OPERATOR_EMAIL")
+
     decision: Decision = await await_human(
         task=f"Approve checkout — {item_name} (${total_usd:.2f})",
         payload_schema=CartApproval,
         payload=payload,
         response_schema=Decision,
+        assign_to=operator_email,
         notify=[f"{channel}:{notify_id}"],
         verifier=verifier,
         timeout_seconds=600,
