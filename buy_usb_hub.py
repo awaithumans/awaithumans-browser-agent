@@ -41,7 +41,7 @@ class CartApproval(BaseModel):
     """What the human sees on Slack / email when the agent reaches checkout."""
 
     action: str = Field(description="One-line summary of what the agent is about to do")
-    page_url: str = Field(description="The page the agent is currently on")
+    checkout_url: str = Field(description="The page the agent is currently on")
     item_name: str = Field(description="Name of the item in the cart")
     quantity: int = Field(description="How many units")
     total_usd: float = Field(description="Total cost in USD, including tax + shipping")
@@ -73,8 +73,9 @@ tools = Tools()
 @tools.action(
     description=(
         "REQUIRED before clicking 'Place order', 'Submit', 'Pay', or any "
-        "irreversible action. Sends the cart details to a human for approval. "
-        "Returns 'APPROVED' or 'REJECTED: <reason>'. If rejected, stop and revise."
+        "irreversible action. Sends the cart details to a human for "
+        "approval. Pass the current page URL as `checkout_url`. Returns "
+        "'APPROVED' or 'REJECTED: <reason>'. If rejected, stop and revise."
     )
 )
 async def request_human_approval(
@@ -82,7 +83,7 @@ async def request_human_approval(
     quantity: int,
     total_usd: float,
     shipping_address: str,
-    page_url: str,
+    checkout_url: str,
     action: str = "Submit order",
     eta: str | None = None,
 ) -> ActionResult:
@@ -90,7 +91,7 @@ async def request_human_approval(
 
     payload = CartApproval(
         action=action,
-        page_url=page_url,
+        checkout_url=checkout_url,
         item_name=item_name,
         quantity=quantity,
         total_usd=total_usd,
