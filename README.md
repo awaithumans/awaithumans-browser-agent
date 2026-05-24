@@ -247,9 +247,11 @@ MIT. Use it, fork it, ship it.
 
 ## 🗺 Roadmap
 
-- [ ] Telegram channel — coming in awaithumans Week 3 release
-- [ ] TypeScript version using Stagehand
-- [ ] WhatsApp channel (via Twilio bridge)
-- [ ] Companion demos: AI deploy approver, AI content moderator, AI travel booker
+- [ ] **Prediction-market demo** — agent that picks Manifold Markets positions, asks human to approve each bet. Likely the highest-leverage shareable variant (AI + markets + HITL).
+- [ ] **Job-application demo, polished** — `job_application.py` exists but points at a placeholder URL. Target a safe Greenhouse demo board with a realistic application flow. Operator explicitly refuses this category, so it's a direct gap awaithumans fills.
+- [ ] **Telegram channel** — coming in awaithumans Week 3 release (mobile-first operators)
+- [ ] **TypeScript version using Stagehand** — same demo, TS-native stack
+- [ ] **WhatsApp channel** (via Twilio bridge) — for personal-agent use cases
+- [ ] **Companion demos**: AI deploy approver (CI/CD gate), AI content moderator (suspend / restore), AI travel booker (book flights, ask before checkout)
 
 Have an idea? [Open an issue](https://github.com/awaithumans/awaithumans-browser-agent/issues) or DM [@awaithumans](https://x.com/awaithumans) on X.
