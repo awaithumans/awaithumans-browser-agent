@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import uuid
 
 from browser_use import ActionResult, Agent, ChatAnthropic, ChatOpenAI, Tools
 from dotenv import load_dotenv
@@ -22,6 +23,10 @@ from pydantic import BaseModel, Field
 from awaithumans import await_human
 
 load_dotenv()
+
+# Fresh idempotency suffix per script invocation. See note in
+# buy_usb_hub.py for why this matters.
+RUN_ID = uuid.uuid4().hex[:12]
 
 
 class ApplicationDraft(BaseModel):
@@ -88,6 +93,7 @@ async def request_application_approval(
         assign_to=operator_email,
         notify=[f"{channel}:{notify_id}"],
         timeout_seconds=1800,  # 30 min — applications need real review time
+        idempotency_key=f"application-{RUN_ID}",
     )
 
     if decision.approve:

@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import uuid
 
 from browser_use import ActionResult, Agent, ChatAnthropic, ChatOpenAI, Tools
 from dotenv import load_dotenv
@@ -30,6 +31,14 @@ from awaithumans import await_human
 from awaithumans.verifiers.claude import claude_verifier
 
 load_dotenv()
+
+# One unique key per script invocation. Within a single run the agent
+# might retry the same approval (e.g., transient network error) — those
+# retries collapse onto the same task via the server's idempotency check.
+# A fresh `python buy_usb_hub.py` gets a fresh key so it never hits the
+# cached response from a previous run. Without this, repeated demos
+# silently return the FIRST run's approval forever.
+RUN_ID = uuid.uuid4().hex[:12]
 
 
 # ---------------------------------------------------------------------------
@@ -152,6 +161,7 @@ async def request_human_approval(
         notify=[f"{channel}:{notify_id}"],
         verifier=verifier,
         timeout_seconds=600,
+        idempotency_key=f"checkout-{RUN_ID}",
     )
 
     if decision.approve:
