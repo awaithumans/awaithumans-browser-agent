@@ -27,7 +27,7 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
 from awaithumans import await_human
-from awaithumans.verifier_claude import ClaudeVerifier
+from awaithumans.verifiers.claude import claude_verifier
 
 load_dotenv()
 
@@ -98,23 +98,26 @@ async def request_human_approval(
         eta=eta,
     )
 
-    # Optional AI verifier: Claude pre-screens the request before paging the
-    # human. If the request is obviously fine (e.g., total within budget,
-    # URL matches the demo store), the verifier returns auto-approve and
-    # the human never sees a notification. If anything looks off, the
-    # verifier flags it for the human's attention.
+    # Optional AI verifier: Claude reviews the human's response before
+    # resuming the agent. Catches accidental approvals, mismatched data,
+    # etc. Server-side only — runs on the awaithumans server, the SDK
+    # just passes config. Skip if no ANTHROPIC_API_KEY in the env.
     verifier = None
     if os.environ.get("ANTHROPIC_API_KEY"):
-        verifier = ClaudeVerifier(
+        verifier = claude_verifier(
             instructions=(
-                "You are pre-screening a checkout approval request. "
-                "AUTO-APPROVE if: total <= $40, URL contains 'localhost:8080' "
-                "or the configured demo store domain, item description matches "
-                "a reasonable USB-C product, address is the user's known address. "
-                "ESCALATE TO HUMAN otherwise."
+                "You're a second-pass check on a checkout approval. "
+                "PASS if the human's decision is consistent with the cart "
+                "payload — total under $40, URL matches the demo store, "
+                "items look like a reasonable purchase. FAIL otherwise so "
+                "the agent re-asks the human."
             ),
         )
 
+    # Channel is inferred from the prefix on each notify target.
+    # 'slack:U01234567' routes to a Slack DM; 'email:you@example.com'
+    # routes to an email magic-link. The await_human SDK doesn't take
+    # a separate channel kwarg.
     channel = os.environ.get("AWAITHUMANS_DEMO_CHANNEL", "slack")
     notify_id = (
         os.environ["DEMO_SLACK_NOTIFY_ID"]
@@ -124,9 +127,9 @@ async def request_human_approval(
 
     decision: Decision = await await_human(
         task=f"Approve checkout — {item_name} (${total_usd:.2f})",
+        payload_schema=CartApproval,
         payload=payload,
         response_schema=Decision,
-        channel=channel,
         notify=[f"{channel}:{notify_id}"],
         verifier=verifier,
         timeout_seconds=600,

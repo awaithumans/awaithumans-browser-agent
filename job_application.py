@@ -80,9 +80,9 @@ async def request_application_approval(
 
     decision: Decision = await await_human(
         task=f"Approve application — {job_title} at {company}",
+        payload_schema=ApplicationDraft,
         payload=payload,
         response_schema=Decision,
-        channel=channel,
         notify=[f"{channel}:{notify_id}"],
         timeout_seconds=1800,  # 30 min — applications need real review time
     )
