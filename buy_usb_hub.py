@@ -102,9 +102,19 @@ async def request_human_approval(
     # Optional AI verifier: Claude reviews the human's response before
     # resuming the agent. Catches accidental approvals, mismatched data,
     # etc. Server-side only — runs on the awaithumans server, the SDK
-    # just passes config. Skip if no ANTHROPIC_API_KEY in the env.
+    # just passes config.
+    #
+    # OFF by default because the published Docker image (:latest /
+    # :v0.1.6) doesn't ship the [verifier-claude] extra — turning this
+    # on against the default image causes the response submission to
+    # fail with: "Verifier provider 'claude' requires the
+    # [verifier-claude] extra. Install with:
+    # pip install \"awaithumans[verifier-claude]\"".
+    #
+    # To enable, build a custom image (or run a local server) with the
+    # extra installed, then set DEMO_USE_VERIFIER=true in .env.
     verifier = None
-    if os.environ.get("ANTHROPIC_API_KEY"):
+    if os.environ.get("DEMO_USE_VERIFIER", "false").lower() == "true":
         verifier = claude_verifier(
             instructions=(
                 "You're a second-pass check on a checkout approval. "
